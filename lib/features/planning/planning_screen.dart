@@ -1205,6 +1205,7 @@ class _ExistingPlanHero extends StatelessWidget {
                     ),
                   ),
                   ElevatedButton(
+                    key: const Key('start_planning_block_button'),
                     onPressed: () => onStartBlock(nextBlock!),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: palette.primary,

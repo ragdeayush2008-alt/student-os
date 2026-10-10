@@ -87,11 +87,12 @@ void main() {
         customTitle: 'Macroeconomics',
       );
 
-      await tester.pumpWidget(wrapWithApp(const PlanningScreen()));
+      await tester.pumpWidget(wrapWithApp(const PlanningScreen(), width: 1200));
       await tester.pumpAndSettle();
 
       // Tap START button
-      final startBtn = find.text('START').first;
+      final startBtn = find.byKey(const Key('start_planning_block_button'));
+      await tester.ensureVisible(startBtn);
       await tester.tap(startBtn);
       await tester.pumpAndSettle();
 
@@ -113,7 +114,7 @@ void main() {
       AuthIsolation.instance.setAuthenticatedUser('active_focus_user');
       FocusController.instance.startQuickFocus(subjectName: 'Live Session');
 
-      await tester.pumpWidget(wrapWithApp(const PlanningScreen()));
+      await tester.pumpWidget(wrapWithApp(const PlanningScreen(), width: 1200));
       await tester.pumpAndSettle();
 
       expect(find.text('FOCUS SESSION IN PROGRESS'), findsOneWidget);
