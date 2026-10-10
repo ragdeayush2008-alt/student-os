@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "autonomous": true,
+    "configuration_discovery": true,
+    "secrets_safe": true,
+    "no_unnecessary_questions": true,
+    "continuous_fixing": true,
+    "physical_device_first": true,
+    "never_create_phase_tests": true,
+    "testing_structure": "unit/widget/integration/regression/phases"
+  },
+  "note": "Updated 2026-09-03: autonomous mode enabled, inspect all local sources before asking user, never claim success without device/test verification, never expose secrets. Testing: NEVER create phaseXX_test.dart for normal development. Use test/unit/, test/widget/, test/integration/, test/regression/ with feature subdirs."
+}

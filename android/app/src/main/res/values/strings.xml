@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_desc_student_os_exam_countdown">Next exam countdown from Student OS</string>
+    <string name="widget_desc_student_os_tasks">Today\'s tasks from Student OS</string>
+    <string name="widget_desc_student_os_plan">Daily plan from Student OS</string>
+    <string name="widget_desc_student_os_focus">Quick focus launcher from Student OS</string>
+    <string name="widget_desc_student_os_assistant">Next recommendation from Student OS</string>
+    <string name="widget_desc_student_os_sleep">Sleep schedule from Student OS</string>
+    <string name="widget_desc_student_os_study">Today\'s study from Student OS</string>
+    <string name="widget_desc_student_os_brief">Daily brief from Student OS</string>
+</resources>

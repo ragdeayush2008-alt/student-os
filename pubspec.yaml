@@ -34,6 +34,20 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  shared_preferences: ^2.5.5
+  supabase_flutter: ^2.17.2
+  google_sign_in: ^6.2.0
+  url_launcher: ^6.3.2
+  app_links: ^7.2.1
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
+  uuid: ^4.5.1
+  meta: ^1.17.0
+
+  flutter_native_splash: ^2.4.8
+  just_audio: ^0.9.34
+  wakelock_plus: ^1.2.4
+  home_widget: ^0.9.0
 
 dev_dependencies:
   flutter_test:
@@ -45,22 +59,26 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
   uses-material-design: true
-
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/images/
+    - assets/audio/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -87,3 +105,26 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color: "#01271B"
+  image: assets/images/logo.png
+  image_dark: assets/images/logo.png
+  color_dark: "#01271B"
+
+  android_12:
+    color: "#01271B"
+    color_dark: "#01271B"
+    image: assets/images/logo.png
+    image_dark: assets/images/logo.png
+
+  fullscreen: true
+  android_gravity: center
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/logo.png
+  adaptive_icon_background: "#01271B"
+  adaptive_icon_foreground: assets/images/logo.png
+  min_sdk_android: 21

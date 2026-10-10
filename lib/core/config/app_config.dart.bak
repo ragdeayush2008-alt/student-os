@@ -1,0 +1,25 @@
+import 'package:meta/meta.dart';
+
+/// Application compile-time configuration.
+///
+/// Credentials are supplied at build/run time via `dart-define` environment
+/// variables — never hardcoded or committed. When they are absent, the app
+/// runs in local/demo mode (see [isSupabaseConfigured]).
+abstract final class AppConfig {
+  /// Supabase project URL (from `--dart-define=SUPABASE_URL=...`).
+  static String get supabaseUrl => const String.fromEnvironment('SUPABASE_URL') || _env["SUPABASE_URL"] ?? "";
+
+  /// Supabase anon (publishable) key — NOT the service role key.
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+  );
+
+  /// Whether Supabase is configured (both URL and anon key present).
+  static bool get isSupabaseConfigured =>
+      isConfiguredFor(supabaseUrl, supabaseAnonKey);
+
+  /// Pure detection predicate, kept separate for deterministic tests.
+  @visibleForTesting
+  static bool isConfiguredFor(String url, String anonKey) =>
+      url.isNotEmpty && anonKey.isNotEmpty;
+}
