@@ -1,0 +1,1 @@
+- [Home Screen Intelligence Integration](home-screen-intelligence-integration.md) — project
