@@ -21,23 +21,27 @@ void main() {
       // Phase 1: the primary glow tone is Forest, the product's identity.
       expect(
         StudentOSGlow.colorFor(StudentOSGlowTone.primary),
-        const Color(0xFF285C4D),
+        StudentOSColors.primary,
       );
       expect(
         StudentOSGlow.colorFor(StudentOSGlowTone.secondary),
-        const Color(0xFF7657F5),
+        StudentOSColors.secondary,
       );
       expect(
         StudentOSGlow.colorFor(StudentOSGlowTone.success),
-        const Color(0xFF16B88A),
+        StudentOSColors.success,
       );
       expect(
         StudentOSGlow.colorFor(StudentOSGlowTone.warning),
-        const Color(0xFFF5A524),
+        StudentOSColors.warning,
       );
       expect(
         StudentOSGlow.colorFor(StudentOSGlowTone.danger),
-        const Color(0xFFEF5B63),
+        StudentOSColors.danger,
+      );
+      expect(
+        StudentOSGlow.colorFor(StudentOSGlowTone.info),
+        StudentOSColors.info,
       );
     });
 

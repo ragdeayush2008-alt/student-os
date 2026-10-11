@@ -71,18 +71,7 @@ class AppCard extends StatelessWidget {
     final Color shadowTint = scheme.shadow;
     List<BoxShadow>? effectiveShadows = const <BoxShadow>[];
     if (elevation > 0) {
-      effectiveShadows = [
-        BoxShadow(
-          color: shadowTint.withValues(alpha: isDark ? 0.30 : 0.05),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-        BoxShadow(
-          color: shadowTint.withValues(alpha: isDark ? 0.18 : 0.03),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ];
+      effectiveShadows = AppElevation.soft(shadowTint, isDark: isDark);
     }
 
     Widget inner = Padding(padding: padding, child: child);

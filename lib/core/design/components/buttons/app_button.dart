@@ -15,6 +15,9 @@ enum AppButtonVariant {
   /// Minimal text button — tertiary actions.
   tertiary,
 
+  /// Compact button — for layout-constrained areas.
+  compact,
+
   /// Deep forest destructive accent (#2F453D) — delete / cancel actions.
   destructive,
 }
@@ -98,6 +101,20 @@ class AppButton extends StatefulWidget {
     this.semanticLabel,
   }) : variant = AppButtonVariant.destructive;
 
+  /// Factory for Compact button (Dense touch areas).
+  const AppButton.compact({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.trailingIcon,
+    this.expand = false,
+    this.isLoading = false,
+    this.radius = LiquidRadius.sm,
+    this.padding,
+    this.semanticLabel,
+  }) : variant = AppButtonVariant.compact;
+
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
@@ -148,13 +165,17 @@ class _AppButtonState extends State<AppButton> {
         fg = Colors.white;
         border = null;
         break;
+      case AppButtonVariant.compact:
+        bg = isDark ? const Color(0xFF161B22) : Colors.white;
+        fg = isDark ? LiquidColors.textPrimaryDark : LiquidColors.textPrimaryLight;
+        border = isDark ? const Color(0xFF2A3342) : const Color(0xFFE4E7EC);
+        break;
     }
 
     final effectivePadding = widget.padding ??
-        const EdgeInsets.symmetric(
-          horizontal: LiquidSpacing.lg,
-          vertical: 13,
-        );
+        (widget.variant == AppButtonVariant.compact
+            ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
+            : const EdgeInsets.symmetric(horizontal: LiquidSpacing.lg, vertical: 13));
 
     final content = Row(
       mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
@@ -176,7 +197,10 @@ class _AppButtonState extends State<AppButton> {
         ],
         Text(
           widget.label,
-          style: theme.textTheme.labelLarge?.copyWith(
+          style: (widget.variant == AppButtonVariant.compact
+                  ? theme.textTheme.labelSmall
+                  : theme.textTheme.labelLarge)
+              ?.copyWith(
             color: isEnabled ? fg : fg.withValues(alpha: 0.4),
             fontWeight: FontWeight.w700,
           ),

@@ -8,7 +8,7 @@ abstract final class LiquidTypography {
     fontFamily: fontFamily,
     fontSize: 38,
     fontWeight: FontWeight.w800,
-    letterSpacing: -0.8,
+    letterSpacing: -0.4, // Less negative for "airy" feel
     height: 1.15,
     color: color,
   );
@@ -17,7 +17,7 @@ abstract final class LiquidTypography {
     fontFamily: fontFamily,
     fontSize: 28,
     fontWeight: FontWeight.w700,
-    letterSpacing: -0.5,
+    letterSpacing: -0.2, // Less negative
     height: 1.2,
     color: color,
   );
@@ -26,7 +26,7 @@ abstract final class LiquidTypography {
     fontFamily: fontFamily,
     fontSize: 22,
     fontWeight: FontWeight.w700,
-    letterSpacing: -0.3,
+    letterSpacing: -0.1, // Less negative
     height: 1.25,
     color: color,
   );

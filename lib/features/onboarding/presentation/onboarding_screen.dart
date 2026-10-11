@@ -13,6 +13,7 @@ import '../../../core/services/student_service.dart';
 import '../../guides/guide_progress_store.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/student_os_auth_shell.dart';
+import '../../../core/widgets/student_os_onboarding_progress.dart';
 import '../../../data/models/catalog/active_course_selection.dart';
 import '../../../data/models/catalog/catalog_category.dart';
 import '../../../data/models/catalog/catalog_family.dart';
@@ -377,7 +378,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: AnimatedEntrance(
                             duration: AppDurations.fast,
-                            child: _OnboardingSegmentedProgress(step: _step, total: _totalSteps),
+                            child: StudentOSOnboardingProgress(step: _step, total: _totalSteps),
                           ),
                         ),
                       ),
@@ -561,152 +562,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-/// Premium segmented progress: active segment glows emerald with a tiny
-/// traveling highlight on entry; completed = muted emerald; remaining = sage.
-/// Respects reduced motion. Full screen-reader semantics.
-class _OnboardingSegmentedProgress extends StatefulWidget {
-  const _OnboardingSegmentedProgress({required this.step, required this.total});
-  final int step;
-  final int total;
-
-  @override
-  State<_OnboardingSegmentedProgress> createState() =>
-      _OnboardingSegmentedProgressState();
-}
-
-class _OnboardingSegmentedProgressState
-    extends State<_OnboardingSegmentedProgress>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _sheen;
-  late Animation<double> _sheenPos;
-
-  @override
-  void initState() {
-    super.initState();
-    _sheen = AnimationController(
-      duration: const Duration(milliseconds: 900),
-      vsync: this,
-    );
-    _sheenPos = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _sheen, curve: Curves.easeOut),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!MediaQuery.disableAnimationsOf(context)) {
-      // One gentle sweep on entry — not looping.
-      Future.microtask(() {
-        if (mounted && !_sheen.isAnimating && _sheen.value == 0) {
-          _sheen.forward();
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _sheen.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final clamped = widget.step.clamp(0, widget.total - 1);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    return Semantics(
-      label: 'Step ${clamped + 1} of ${widget.total}',
-      value: '${(((clamped + 1) / widget.total) * 100).round()} percent complete',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'STEP ${clamped + 1} OF ${widget.total}',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.0,
-              color: scheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              for (var i = 0; i < widget.total; i++) ...[
-                if (i > 0) const SizedBox(width: 6),
-                Expanded(
-                  flex: i == clamped ? 2 : 1,
-                  child: AnimatedContainer(
-                    duration:
-                        reduceMotion ? Duration.zero : AppDurations.fast,
-                    curve: AppCurves.standard,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: i < clamped
-                          ? scheme.primary.withValues(alpha: 0.45)
-                          : i == clamped
-                              ? scheme.primary
-                              : (isDark
-                                  ? scheme.surfaceContainerHighest
-                                  : AppColors.paleSage),
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: i == clamped
-                          ? [
-                              BoxShadow(
-                                color: scheme.primary
-                                    .withValues(alpha: 0.35),
-                                blurRadius: 8,
-                                offset: const Offset(0, 1),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: i == clamped && !reduceMotion
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(999),
-                            child: AnimatedBuilder(
-                              animation: _sheenPos,
-                              builder: (context, _) {
-                                return Stack(
-                                  children: [
-                                    Positioned(
-                                      left: _sheenPos.value * 60 - 30,
-                                      top: 0,
-                                      bottom: 0,
-                                      child: Container(
-                                        width: 30,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Colors.white
-                                                  .withValues(alpha: 0),
-                                              Colors.white
-                                                  .withValues(alpha: 0.45),
-                                              Colors.white
-                                                  .withValues(alpha: 0),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── STEP 0: NAME ───────────────────────────────────────────────────
 

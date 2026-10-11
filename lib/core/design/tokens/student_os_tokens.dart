@@ -37,6 +37,7 @@ abstract final class StudentOSColors {
 
   // === Secondary — sage tonal step (NOT purple) ===
   static const Color secondary = mutedGreen;
+  static const Color tertiary = sage;
 
   // === Semantic — green-family equivalents ===
   static const Color success = Color(0xFF2E7D5B);

@@ -26,7 +26,7 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _LeaderboardScreenState extends State<LeaderboardScreen> with WidgetsBindingObserver {
   final LeaderboardController _controller = LeaderboardController.instance;
 
   Timer? _pollingTimer;
@@ -37,16 +37,28 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     _controller.addListener(_onChanged);
     _controller.load();
     _startPolling();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     _pollingTimer?.cancel();
     _controller.removeListener(_onChanged);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startPolling();
+    } else {
+      _pollingTimer?.cancel();
+    }
+  }
+
   void _startPolling() {
+    _pollingTimer?.cancel();
     // Poll every 30 seconds
     _pollingTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) {

@@ -11,15 +11,15 @@ abstract final class AppElevation {
   static const double medium = 3;
   static const double high = 8;
 
-  static List<BoxShadow> soft(Color shadow) => [
+  static List<BoxShadow> soft(Color shadow, {bool isDark = false}) => [
     BoxShadow(
-      color: shadow.withValues(alpha: 0.08),
-      blurRadius: 20,
-      offset: const Offset(0, 6),
+      color: shadow.withValues(alpha: isDark ? 0.25 : 0.06), // Softer, more diffuse
+      blurRadius: 24,
+      offset: const Offset(0, 8),
     ),
     BoxShadow(
-      color: shadow.withValues(alpha: 0.05),
-      blurRadius: 4,
+      color: shadow.withValues(alpha: isDark ? 0.15 : 0.04),
+      blurRadius: 6,
       offset: const Offset(0, 2),
     ),
   ];

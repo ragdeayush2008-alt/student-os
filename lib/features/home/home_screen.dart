@@ -28,6 +28,7 @@ import '../../core/widgets/app_pressable.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/app_section_header.dart';
 import '../../core/widgets/app_states.dart';
+import '../../core/design/components/buttons/app_button.dart';
 import '../../core/widgets/student_os_action_cards.dart';
 import '../../core/widgets/student_os_assistant_visual.dart';
 import '../../data/models/exam.dart';
@@ -48,6 +49,7 @@ import '../sleep/widgets/sleep_summary_card.dart';
 import '../tasks/presentation/task_creation_sheet.dart';
 import '../tasks/task_controller.dart';
 import '../calendar/academic_schedule_controller.dart';
+import 'home_controller.dart';
 import 'adaptive_intelligence_widgets.dart';
 import 'home_command_center_state.dart';
 import 'home_command_center_widgets.dart';
@@ -67,32 +69,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Throttle Focus tick: Home only needs session start/pause/complete, not every second.
-  String? _lastFocusSessionId;
-  bool _lastFocusHasActive = false;
-  bool _lastFocusIsPaused = false;
+  // Use a ChangeNotifier or dedicated State controller to manage the derived Home state.
+  // This will prevent rebuilding the entire screen for every small controller change.
+  late HomeController _homeController;
 
   @override
   void initState() {
     super.initState();
+    _homeController = HomeController();
     DailyOsCoordinator.instance.init();
-    DailyOsCoordinator.instance.addListener(_onDataChanged);
-    TaskController.instance.addListener(_onDataChanged);
-    ExamController.instance.addListener(_onDataChanged);
-    StudyController.instance.addListener(_onDataChanged);
-    SubjectController.instance.addListener(_onDataChanged);
-    StudentService.instance.addListener(_onDataChanged);
-    GoalController.instance.addListener(_onDataChanged);
-    ResourceController.instance.addListener(_onDataChanged);
-    AcademicIntelligenceController.instance.addListener(_onDataChanged);
-    ProgressionController.instance.addListener(_onDataChanged);
-    AuthService.instance.addListener(_onDataChanged);
-    PlanningBlockController.instance.addListener(_onDataChanged);
-    FocusController.instance.addListener(_onFocusChanged);
-    AcademicScheduleController.instance.addListener(_onDataChanged);
-    _syncFocusSnapshot();
+
+    // Listen to changes in the controller, NOT every single underlying service.
+    _homeController.addListener(_onDataChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOfferTour());
   }
+
+  // ... (keep the rest of the file mostly the same for now,
+  // but replace the listeners with _homeController listening)
 
   /// One-time 60-second tour offer after fresh onboarding. Never traps:
   /// both choices dismiss permanently (Start launches, Skip records).
@@ -136,45 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() {});
   }
 
-  void _syncFocusSnapshot() {
-    final fc = FocusController.instance;
-    _lastFocusSessionId = fc.activeSession?.id;
-    _lastFocusHasActive = fc.hasActiveSession;
-    _lastFocusIsPaused = fc.activeSession?.isPaused ?? false;
-  }
-
-  void _onFocusChanged() {
-    final fc = FocusController.instance;
-    final id = fc.activeSession?.id;
-    final hasActive = fc.hasActiveSession;
-    final isPaused = fc.activeSession?.isPaused ?? false;
-    // Only rebuild Home when session identity or phase changes, not every tick.
-    if (id != _lastFocusSessionId ||
-        hasActive != _lastFocusHasActive ||
-        isPaused != _lastFocusIsPaused) {
-      _lastFocusSessionId = id;
-      _lastFocusHasActive = hasActive;
-      _lastFocusIsPaused = isPaused;
-      if (mounted) setState(() {});
-    }
-  }
-
   @override
   void dispose() {
-    DailyOsCoordinator.instance.removeListener(_onDataChanged);
-    TaskController.instance.removeListener(_onDataChanged);
-    ExamController.instance.removeListener(_onDataChanged);
-    StudyController.instance.removeListener(_onDataChanged);
-    SubjectController.instance.removeListener(_onDataChanged);
-    StudentService.instance.removeListener(_onDataChanged);
-    GoalController.instance.removeListener(_onDataChanged);
-    ResourceController.instance.removeListener(_onDataChanged);
-    AcademicIntelligenceController.instance.removeListener(_onDataChanged);
-    ProgressionController.instance.removeListener(_onDataChanged);
-    AuthService.instance.removeListener(_onDataChanged);
-    PlanningBlockController.instance.removeListener(_onDataChanged);
-    FocusController.instance.removeListener(_onFocusChanged);
-    AcademicScheduleController.instance.removeListener(_onDataChanged);
+    _homeController.dispose();
     super.dispose();
   }
 
@@ -342,6 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return AppScaffold(
+      showAmbient: false,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
           horizontal: 12,
@@ -493,7 +452,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   state: dailyState,
                   healthState: autopilotState.healthState,
                   focusMinutesToday: focusMinutesToday,
-                  onViewPlan: () => AppRouter.openPlan(context),
+                  onViewPlan: () {
+                    AppRouter.openPlan(context);
+                  },
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -1197,30 +1158,17 @@ class _PlanTileAction extends StatelessWidget {
     switch (status) {
       case PlanningBlockStatus.current:
       case PlanningBlockStatus.upcoming:
-        return AppHitTestArea(
-          child: ElevatedButton(
-            onPressed: () =>
-                AppRouter.startPlanningBlockFocus(context, block),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              minimumSize: Size.zero,
-            ),
-            child: const Text('Start', style: TextStyle(fontSize: 12)),
-          ),
+        return AppButton.compact(
+          label: status == PlanningBlockStatus.current ? 'Continue' : 'Start',
+          onPressed: () => AppRouter.startPlanningBlockFocus(context, block),
         );
       case PlanningBlockStatus.missed:
-        return AppHitTestArea(
-          child: OutlinedButton(
-            onPressed: () => UniversalActionExecutor.executePlanningBlockAction(
-              context,
-              UniversalBlockAction.recover,
-              block,
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              minimumSize: Size.zero,
-            ),
-            child: const Text('Recover', style: TextStyle(fontSize: 12)),
+        return AppButton.compact(
+          label: 'Recover',
+          onPressed: () => UniversalActionExecutor.executePlanningBlockAction(
+            context,
+            UniversalBlockAction.recover,
+            block,
           ),
         );
       case PlanningBlockStatus.completed:

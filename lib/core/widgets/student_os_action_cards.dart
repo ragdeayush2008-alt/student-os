@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../design/tokens/student_os_tokens.dart';
 import 'app_pressable.dart';
 import 'student_os_page_header.dart';
+import '../design/components/buttons/app_button.dart';
 
 /// Canonical Student OS action + insight components.
 ///

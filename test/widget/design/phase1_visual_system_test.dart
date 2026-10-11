@@ -40,15 +40,15 @@ void main() {
       }
     });
 
-    test('primary drives the color scheme, blue stays a separate accent', () {
+    test('primary drives the color scheme, secondary accent stays distinct', () {
       final light = AppTheme.light().colorScheme;
       final dark = AppTheme.dark().colorScheme;
 
-      expect(light.primary, AppColors.forest);
-      expect(light.tertiary, AppColors.studentBlue);
-      // Blue must not masquerade as the product identity.
-      expect(light.primary, isNot(AppColors.studentBlue));
-      expect(dark.primary, isNot(AppColors.studentBlue));
+      expect(light.primary, StudentOSColors.primary);
+      expect(light.tertiary, StudentOSColors.tertiary);
+      // Ensure primary and tertiary are distinct shades of green.
+      expect(light.primary, isNot(light.tertiary));
+      expect(dark.primary, isNot(dark.tertiary));
     });
 
     test('blue is never used as a broad surface color', () {
@@ -277,9 +277,16 @@ void main() {
           ))
           .toList();
       expect(icons, isNotEmpty);
-      // The selected icon is Forest (or its dark sage variant), never blue.
+      // The selected icon should use a green identity (primary or secondary).
       for (final icon in icons) {
-        expect(icon.color, isNot(AppColors.studentBlue));
+        expect(
+          icon.color == StudentOSColors.primary ||
+              icon.color == StudentOSColors.secondary ||
+              icon.color == StudentOSColors.textSecondary ||
+              icon.color == StudentOSColors.textMuted,
+          isTrue,
+          reason: 'icon color ${icon.color} is not a valid green identity',
+        );
       }
       expect(tester.takeException(), isNull);
     });

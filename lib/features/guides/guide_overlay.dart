@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/three_d_tilt_wrapper.dart';
 import 'guide_controller.dart';
 import 'guide_targets.dart';
 import 'models/guide_models.dart';
@@ -354,7 +355,7 @@ class _SpotlightRing extends StatelessWidget {
   }
 }
 
-class _CoachCard extends StatefulWidget {
+class _CoachCard extends StatelessWidget {
   const _CoachCard({
     required this.guide,
     required this.step,
@@ -372,33 +373,10 @@ class _CoachCard extends StatefulWidget {
   final bool reduceMotion;
 
   @override
-  State<_CoachCard> createState() => _CoachCardState();
-}
-
-class _CoachCardState extends State<_CoachCard> {
-  Offset _tilt = Offset.zero;
-
-  void _handlePointerMove(PointerEvent event) {
-    if (widget.reduceMotion) return;
-    final size = MediaQuery.sizeOf(context);
-    setState(() {
-      _tilt = Offset(
-        (event.localPosition.dx / size.width - 0.5) * 2,
-        (event.localPosition.dy / size.height - 0.5) * 2,
-      );
-    });
-  }
-
-  void _handlePointerUp(PointerEvent event) {
-    if (widget.reduceMotion) return;
-    setState(() => _tilt = Offset.zero);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final palette = AppTheme.colorsOf(context);
     final controller = GuideController.instance;
-    final needsRealAction = switch (widget.step.expectation) {
+    final needsRealAction = switch (step.expectation) {
       GuideExpectationKind.screenSeen => false,
       GuideExpectationKind.continueTap => false,
       GuideExpectationKind.focusSessionStarted => true,
@@ -408,156 +386,135 @@ class _CoachCardState extends State<_CoachCard> {
       GuideExpectationKind.planningBlockCreated => true,
     };
 
-    return Listener(
-      onPointerMove: _handlePointerMove,
-      onPointerCancel: _handlePointerUp,
-      onPointerUp: _handlePointerUp,
-      child: TweenAnimationBuilder<Matrix4>(
-        tween: Matrix4Tween(
-          begin: Matrix4.identity(),
-          end: widget.reduceMotion
-              ? Matrix4.identity()
-              : (Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..rotateX(_tilt.dy * 0.1)
-                ..rotateY(-_tilt.dx * 0.1)),
-        ),
-        duration: const Duration(milliseconds: 200),
-        builder: (context, transform, child) {
-          return Transform(
-            transform: transform,
-            alignment: Alignment.center,
-            child: child,
-          );
-        },
-        child: AnimatedContainer(
-          duration: widget.reduceMotion ? Duration.zero : const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          constraints: const BoxConstraints(maxWidth: 420),
-          decoration: BoxDecoration(
-            color: palette.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: palette.sage.withValues(alpha: 0.4),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: palette.primary.withValues(alpha: 0.18),
-                blurRadius: 28,
-                offset: const Offset(0, 12),
-              ),
-            ],
+    return ThreeDTiltWrapper(
+      reduceMotion: reduceMotion,
+      child: AnimatedContainer(
+        duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        constraints: const BoxConstraints(maxWidth: 420),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: palette.sage.withValues(alpha: 0.4),
           ),
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: palette.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Semantics(
-                      label: 'Step ${widget.stepNumber} of ${widget.stepCount}',
-                      child: Text(
-                        '${widget.stepNumber} / ${widget.stepCount}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(
-                              color: palette.primary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                    ),
+          boxShadow: [
+            BoxShadow(
+              color: palette.primary.withValues(alpha: 0.18),
+              blurRadius: 28,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: palette.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  child: Semantics(
+                    label: 'Step $stepNumber of $stepCount',
                     child: Text(
-                      widget.guide.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: palette.onSurfaceMuted,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.4,
+                      '$stepNumber / $stepCount',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                            color: palette.primary,
+                            fontWeight: FontWeight.w800,
                           ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    tooltip: 'Exit guide',
-                    onPressed: () => controller.exitGuide(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.step.title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                widget.step.message,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: palette.onSurfaceMuted,
-                      height: 1.45,
-                    ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                needsRealAction
-                    ? 'Do it in the app above — the guide moves when it happens.'
-                    : widget.step.hint,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: palette.onSurfaceMuted.withValues(alpha: 0.85),
-                    ),
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: widget.progress,
-                  minHeight: 5,
-                  backgroundColor: palette.sage.withValues(alpha: 0.25),
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(palette.primary),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    guide.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: palette.onSurfaceMuted,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                        ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  tooltip: 'Exit guide',
+                  onPressed: () => controller.exitGuide(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              step.title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              step.message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: palette.onSurfaceMuted,
+                    height: 1.45,
+                  ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              needsRealAction
+                  ? 'Do it in the app above — the guide moves when it happens.'
+                  : step.hint,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: palette.onSurfaceMuted.withValues(alpha: 0.85),
+                  ),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 5,
+                backgroundColor: palette.sage.withValues(alpha: 0.25),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(palette.primary),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  if (widget.stepNumber > 1)
-                    TextButton(
-                      onPressed: () => controller.previousStep(),
-                      child: const Text('Back'),
-                    ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (stepNumber > 1)
                   TextButton(
-                    onPressed: () => controller.skipStep(),
-                    child: Text(
-                      widget.stepNumber >= widget.stepCount ? 'Finish' : 'Skip step',
-                    ),
+                    onPressed: () => controller.previousStep(),
+                    child: const Text('Back'),
                   ),
-                  const Spacer(),
-                  FilledButton(
-                    onPressed: needsRealAction
-                        ? null
-                        : () => controller.continueStep(),
-                    child: Text(
-                        widget.stepNumber >= widget.stepCount ? 'Done' : 'Continue'),
+                TextButton(
+                  onPressed: () => controller.skipStep(),
+                  child: Text(
+                    stepNumber >= stepCount ? 'Finish' : 'Skip step',
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: needsRealAction
+                      ? null
+                      : () => controller.continueStep(),
+                  child: Text(
+                      stepNumber >= stepCount ? 'Done' : 'Continue'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
